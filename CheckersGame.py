@@ -1,6 +1,6 @@
 # Author: Eric Daly
 # GitHub username: VegetableSchmedly
-# Date: 2/24/2023
+# Date: 3/1/2023
 # Description:
 
 
@@ -33,6 +33,14 @@ class GamePiece:
         elif self._piece_type == 'king':
             self._piece_type = 'triple_king'
 
+    def set_row(self, row):
+        """Set method for row."""
+        self._row = row
+
+    def set_column(self, column):
+        """Set method for column"""
+        self._column = column
+
     def get_location(self):
         """Returns the tuple for row,column of current square."""
         return (self._row, self._column)
@@ -59,24 +67,25 @@ class Player:
     def __init__(self, name, color):
         """Initializes data members"""
         self._name = name
+        self._pieces = []
         self._color = color                              # "Black" or "White"
-        self._kings = []
-        self._triple_kings = []
         self._captured_pieces = []
 
     def get_king_count(self):
         """returns the number of king pieces the player has."""
-        count = 0
-        for king in self._kings:
-            count += 1
-        return count
+        king_count = 0
+        for piece in self._pieces:
+            if piece.get_type() == 'king':
+                king_count+=1
+        return king_count
 
     def get_triple_king_count(self):
         """Returns the number of triple king pieces the player has."""
-        count = 0
-        for king in self._triple_kings:
-            count += 1
-        return count
+        triple_king_count = 0
+        for piece in self._pieces:
+            if piece.get_type() == 'triple_king':
+                triple_king_count+=1
+        return triple_king_count
 
     def get_captured_pieces_count(self):
         """Returns the number of triple king pieces the player has."""
@@ -93,6 +102,14 @@ class Player:
         """Get method for color"""
         return self._color
 
+    def add_piece(self, piece):
+        """Adds a piece to the player's collection"""
+        self._pieces.append(piece)
+
+    def add_captured_piece(self, piece):
+        """Adds a captured piece to the list."""
+        self._captured_pieces.append(piece)
+
 
 class Checkers:
     """Represents a game of checkers."""
@@ -106,7 +123,6 @@ class Checkers:
         self._pieces = []
         self.fill_board()
         self._turn = 0
-
 
     def fill_board(self):
         """fills the list of squares with the appropriate tuples, then the appropriate pieces."""
@@ -132,80 +148,127 @@ class Checkers:
         """Create a player for the game of checkers"""
         player = Player(player_name, piece_color)
         self._players.append(player)
-        # for piece in self._pieces:
-        #     if piece_color == piece.get_color():
-        #         piece.set_player(player)
+        for piece in self._pieces:
+            if piece.get_color() == piece_color:
+                player.add_piece(piece)
         return player
 
     def play_game(self, player_name, starting_square_location, destination_square_location):
         """Represents a move in a game of checkers."""
         move_info = self.valid_move_check(player_name, starting_square_location, destination_square_location)
-        self._turn += 1
-        current_row = starting_square_location[0]
-        current_column = starting_square_location[1]
-        move_row = destination_square_location[0]
-        move_column = destination_square_location[1]
         current_player = move_info[1]
         current_piece = move_info[0]
-        destination_status = None
-        for piece in self._pieces:
-            if piece.get_location == destination_square_location:
-                destination_status = piece.get_color()
 
-        # if current_piece.get_type() == 'normal':
-        #     if current_piece.get_color() == 'Black':
-        #
-        #     elif current_piece.get_color() == 'White':
+        if current_piece.get_type() == 'normal':
+            self.make_normal_move(current_player, current_piece, starting_square_location, destination_square_location)
+        elif current_piece.get_type() == 'king':
+            self.make_king_move(current_player, current_piece, starting_square_location, destination_square_location)
+        elif current_piece.get_type() == 'triple_king':
+            self.make_triple_king_move(current_player, current_piece, starting_square_location, destination_square_location)
 
-    def check_potential_jumps(self, color):
-        """Checks to see if there are jumps that need to be made prior to any regular moves. Returns True if there is."""
-        player_pieces = []
-        opponent_pieces = []
-        potential_jumps = []
-        available_jumps = []
-        for piece in self._pieces:
-            if piece.get_color == color:
-                player_pieces.append(piece)
+    def make_normal_move(self, player, moving_piece, start, destination):
+        """Makes the directed move"""
+        current_row = start[0]
+        current_column = start[1]
+        move_row = destination[0]
+        move_column = destination[1]
+        moving_piece.set_row(move_row)
+        moving_piece.set_column(move_column)
+        if abs(move_row - current_row) > 1:             # If 2 rows move, a jump was executed.
+            if move_column > current_column:
+                jump_column = current_column+1
             else:
-                opponent_pieces.append(piece)
+                jump_column = current_column-1
+            jump_row = current_row + (move_row-current_row)
+            for piece in self._pieces:
+                if piece.get_location == (jump_row, jump_column):
+                    self.capture_piece(player, piece)
+                    self.check_if_end_of_turn(moving_piece, start, destination)
 
-        if color == 'Black':            # Working up the board for normal pieces.
-            for player_piece in player_pieces:
-                for opponent_piece in opponent_pieces:
-                    if opponent_piece.get_location() == (player_piece.get_row()+1, player_piece.get_column+1):
-                        potential_jumps.append((player_piece.get_row()+2, player_piece.get_row()+2))
-                    elif opponent_piece.get_location() == (player_piece.get_row()+1, player_piece.get_column-1):
-                        potential_jumps.append((player_piece.get_row()+2, player_piece.get_row()-2))
-        if color == 'White':            # Working down the board for normal pieces.
-            for player_piece in player_pieces:
-                for opponent_piece in opponent_pieces:
-                    if opponent_piece.get_location() == (player_piece.get_row()-1, player_piece.get_column+1):
-                        potential_jumps.append((player_piece.get_row()-2, player_piece.get_row()+2))
-                    elif opponent_piece.get_location() == (player_piece.get_row()-1, player_piece.get_column-1):
-                        potential_jumps.append((player_piece.get_row()-2, player_piece.get_row()-2))
+    def make_king_move(self, player, piece, start, destination):
+        """Makes a directed move with the rules of a king."""
+        current_row = start[0]
+        current_column = start[1]
+        move_row = destination[0]
+        move_column = destination[1]
 
-        for jump in potential_jumps:
-            if jump[0] > 7 or jump[0] < 0:
-                continue
-            if jump[1] > 7 or jump[1] <0:
-                continue
-            else:
+    def make_triple_king_move(self, player, piece, start, destination):
+        """Makes a directed move with the rules of a triple king."""
+        current_row = start[0]
+        current_column = start[1]
+        move_row = destination[0]
+        move_column = destination[1]
+
+    def capture_piece(self, player, piece):
+        """Removes the piece from the board and adds it to the player's captured list."""
+        self._pieces.remove(piece)
+        player.add_captured_piece(piece)
+
+    def check_if_end_of_turn(self, moving_piece, starting_square, landing_square):
+        """Checks if this is the mid-point in a multi-jump move. If it is a mid-point, does not increment turn."""
+        color = moving_piece.get_color()
+        mid_jump = False
+        if moving_piece.get_color == 'Black':
+            if landing_square[0] - starting_square[0] > 0:      # Moving down
+                potential_right_move = (landing_square[0] + 1, landing_square[1] + 1)
+                potential_left_move = (landing_square[0] + 1, landing_square[1] - 1)
                 for piece in self._pieces:
-                    if piece.get_location() == jump:
-                        continue
-                    else:
-                        available_jumps.append(jump)
+                    if piece.get_location() == potential_left_move and piece.get_location() == 'White':
+                        if potential_left_move[0] < 7 and potential_left_move[1] > 0:
+                            if self.get_checker_details((potential_left_move[0] + 1, potential_left_move[1] - 1)) is None:
+                                return
+                    if piece.get_location() == potential_right_move and piece.get_location() == 'White':
+                        if potential_right_move[0] < 7 and potential_right_move[1] < 7:
+                            if self.get_checker_details((potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
+                                return
+            if landing_square[0] - starting_square[0] < 0:      # Moving up
+                potential_right_move = (landing_square[0] - 1, landing_square[1] + 1)
+                potential_left_move = (landing_square[0] - 1, landing_square[1] - 1)
+                for piece in self._pieces:
+                    if piece.get_location() == potential_left_move and piece.get_location() == 'White':
+                        if potential_left_move[0] > 0 and potential_left_move[1] > 0:
+                            if self.get_checker_details((potential_left_move[0] + 1, potential_left_move[1] - 1)) is None:
+                                return
+                    if piece.get_location() == potential_right_move and piece.get_location() == 'White':
+                        if potential_right_move[0] > 0 and potential_right_move[1] < 7:
+                            if self.get_checker_details((potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
+                                return
 
-        if len(available_jumps) > 0:
-            return True
+        elif moving_piece.get_color == 'White':
+            if landing_square[0] - starting_square[0] > 0:      # Moving down
+                potential_right_move = (landing_square[0] + 1, landing_square[1] + 1)
+                potential_left_move = (landing_square[0] + 1, landing_square[1] - 1)
+                for piece in self._pieces:
+                    if piece.get_location() == potential_left_move and piece.get_location() == 'Black':
+                        if potential_left_move[0] < 7 and potential_left_move[1] > 0:
+                            if self.get_checker_details((potential_left_move[0] + 1, potential_left_move[1] - 1)) is None:
+                                return
+                    if piece.get_location() == potential_right_move and piece.get_location() == 'Black':
+                        if potential_right_move[0] < 7 and potential_right_move[1] < 7:
+                            if self.get_checker_details((potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
+                                return
+            if landing_square[0] - starting_square[0] < 0:      # Moving up
+                potential_right_move = (landing_square[0] - 1, landing_square[1] + 1)
+                potential_left_move = (landing_square[0] - 1, landing_square[1] - 1)
+                for piece in self._pieces:
+                    if piece.get_location() == potential_left_move and piece.get_location() == 'Black':
+                        if potential_left_move[0] > 0 and potential_left_move[1] > 0:
+                            if self.get_checker_details((potential_left_move[0] + 1, potential_left_move[1] - 1)) is None:
+                                return
+                    if piece.get_location() == potential_right_move and piece.get_location() == 'Black':
+                        if potential_right_move[0] > 0 and potential_right_move[1] < 7:
+                            if self.get_checker_details((potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
+                                return
         else:
-            return False
+            self._turn += 1
+            return
 
 
-
+    def check_if_blocked_in(self, color):
+        """Check if the color has no available moves left, losing them the game."""
 
     def valid_move_check(self, player_name, starting_square_location, destination_square_location):
-        """Raises appropriate exception, if there is one."""
+        """Raises appropriate exception, if there is one. Otherwise returns [piece, player]"""
         if player_name.color == 'Black' and self._turn % 2 == 1:
             raise OutofTurn
         if player_name.color == 'White' and self._turn % 2 == 0:
@@ -238,6 +301,91 @@ class Checkers:
             return [current_piece, current_player]
 
 
+
+
+    # def check_potential_jumps(self, color):
+    #     """Checks to see if there are jumps that need to be made prior to any regular moves. Returns True if there is."""
+    #     player_pieces = []
+    #     opponent_pieces = []
+    #     potential_jumps = []
+    #     available_jumps = []
+    #     for piece in self._pieces:
+    #         if piece.get_color == color:
+    #             player_pieces.append(piece)
+    #         else:
+    #             opponent_pieces.append(piece)
+    #
+    #     if color == 'Black':            # Working up the board for normal pieces.
+    #         for player_piece in player_pieces:
+    #             for opponent_piece in opponent_pieces:
+    #                 if opponent_piece.get_location() == (player_piece.get_row()+1, player_piece.get_column+1):
+    #                     potential_jumps.append((player_piece.get_row()+2, player_piece.get_row()+2))
+    #                 elif opponent_piece.get_location() == (player_piece.get_row()+1, player_piece.get_column-1):
+    #                     potential_jumps.append((player_piece.get_row()+2, player_piece.get_row()-2))
+    #     if color == 'White':            # Working down the board for normal pieces.
+    #         for player_piece in player_pieces:
+    #             for opponent_piece in opponent_pieces:
+    #                 if opponent_piece.get_location() == (player_piece.get_row()-1, player_piece.get_column+1):
+    #                     potential_jumps.append((player_piece.get_row()-2, player_piece.get_row()+2))
+    #                 elif opponent_piece.get_location() == (player_piece.get_row()-1, player_piece.get_column-1):
+    #                     potential_jumps.append((player_piece.get_row()-2, player_piece.get_row()-2))
+    #
+    #     for jump in potential_jumps:            # Remove them if they are not within the dimensions of the board.
+    #         if jump[0] > 7 or jump[0] < 0:
+    #             continue
+    #         if jump[1] > 7 or jump[1] <0:
+    #             continue
+    #         else:
+    #             for piece in self._pieces:
+    #                 if piece.get_location() == jump:
+    #                     continue
+    #                 else:
+    #                     available_jumps.append(jump)
+    #
+    #     if len(available_jumps) > 0:
+    #         return True
+    #     else:
+    #         return False
+    #
+
+
+
+    def valid_move_check(self, player_name, starting_square_location, destination_square_location):
+        """Raises appropriate exception, if there is one. Otherwise returns [piece, player]"""
+        if player_name.color == 'Black' and self._turn % 2 == 1:
+            raise OutofTurn
+        if player_name.color == 'White' and self._turn % 2 == 0:
+            raise OutofTurn
+
+        if starting_square_location[0] > 7 or starting_square_location[0] < 0:
+            raise InvalidSquare
+        if starting_square_location[1] > 7 or starting_square_location[1] < 0:
+            raise InvalidSquare
+        if destination_square_location[0] > 7 or destination_square_location[0] < 0:
+            raise InvalidSquare
+        if destination_square_location[1] > 7 or destination_square_location[1] < 0:
+            raise InvalidSquare
+
+        current_player = None
+        for player in self._players:
+            if player.get_name() == player_name:
+                current_player = player
+        if current_player is None:
+            raise InvalidPlayer
+
+        current_piece = None
+        for piece in self._pieces:
+            if piece.get_location() == starting_square_location:
+                current_piece = piece
+        if current_piece.get_color() != current_player.get_color():
+            raise InvalidSquare
+
+        else:
+            return [current_piece, current_player]
+
+
+
+
     def get_checker_details(self, square_location):
         """Returns the checker details at the location specified."""
         if square_location[0] > 7 or square_location[0] < 0:
@@ -266,19 +414,17 @@ class Checkers:
 
     def print_board(self):
         """Prints the gameboard in a readable array, row by row."""
-        for row in range(0,8):
-            row_status = []
-            for square in self._squares:
-                color = None
-                if square[0] == row:
-                    for piece in self._pieces:
-                        if piece.get_location() == square:
-                            color = piece.get_color()
-                    if color:
-                        row_status.append(color)
-                    else:
-                        row_status.append(None)
-            print(row_status)
+        for row in range(0, 8):
+            row_list = []
+            for column in range(0, 8):
+                for piece in self._pieces:
+                    if piece.get_location() == (row, column):
+                        row_list.append(self.get_checker_details((row, column)))
+                        break
+                else:
+                    row_list.append(None)
+            print(row_list)
+
 
 
 
@@ -293,4 +439,6 @@ game = Checkers()
 game.print_board()
 game.create_player('Eric', 'Black')
 game.create_player('Maggie', 'White')
+print(game.get_checker_details((0,0)))
+print(game.get_checker_details((0,1)))
 
