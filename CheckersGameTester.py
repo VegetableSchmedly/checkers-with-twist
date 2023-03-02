@@ -24,6 +24,26 @@ class TestPlayer(unittest.TestCase):
 
     def test_1_Player(self):
         """Tests get methods for king, triple_king, and captured pieces counts."""
+        game = check.Checkers()
+        game.create_player('Eric', 'Black')
+        game.create_player('Maggie', 'White')
+        game.play_game('Eric', (5, 0), (4, 1))
+        game.play_game('Maggie', (2, 1), (3, 2))
+        game.play_game('Eric', (5, 2), (4, 3))
+        game.play_game('Maggie', (2, 3), (3, 4))
+        game.play_game('Eric', (4, 1), (2, 3))
+        game.play_game('Maggie', (3, 4), (4, 5))
+        game.play_game('Eric', (5, 6), (4, 7))
+        game.play_game('Maggie', (1, 2), (3, 4))
+        game.play_game('Maggie', (3, 4), (5, 2))
+        game.play_game('Eric', (6, 1), (5, 0))
+        game.play_game('Maggie', (1, 0), (2, 1))
+        game.play_game('Eric', (7, 0), (6, 1))
+        game.play_game('Maggie', (5, 2), (7, 0))
+        game.play_game('Eric', (6, 3), (5, 2))
+        game.play_game('Maggie', (7, 0), (3, 4))
+        game.print_board()
+
 
 
 class TestCheckers(unittest.TestCase):
@@ -42,10 +62,12 @@ class TestCheckers(unittest.TestCase):
         """Tests play game and normal moves, including a single, double, and triple jump for each color"""
 
     def test_4_Checkers(self):
-        """Tests promotion check for the ending of a jump, and a regular move. For each color. Checks for captured pieces."""
+        """Tests promotion check for the ending of a jump, and a regular move. For each color.
+        Checks for captured pieces."""
 
     def test_5_Checkers(self):
-        """Tests moves and single and double jumps for a king, as well as the promotion to a triple_king"""
+        """Tests moves and single and double jumps for a king, a triple jump that goes forwards and backwards,
+         as well as the promotion to a triple_king"""
 
     def test_6_Checkers(self):
         """Tests moves and single and double jumps for a triple_king.

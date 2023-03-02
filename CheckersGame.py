@@ -172,7 +172,7 @@ class Checkers:
             return self.make_king_move(current_player, current_piece, starting_square_location,
                                        destination_square_location)
         elif current_piece.get_type() == 'triple_king':
-            return self.make_triple_king_move(current_player, current_piece, starting_square_location,
+            return self.make_king_move(current_player, current_piece, starting_square_location,
                                               destination_square_location)
 
     def make_normal_move(self, player, moving_piece, start, destination):
@@ -249,7 +249,7 @@ class Checkers:
                     crossed_column -= 1
         for square in squares_crossed:
             for piece in self._pieces:
-                if piece.get_location() == square:
+                if piece.get_location() == square and piece.get_color() != moving_piece.get_color():
                     self.capture_piece(player, piece)
                     capture_count += 1
                     if rows_moved == 2:  # Check to see if it was a normal jump, therefore able to be a multi-jump
@@ -293,7 +293,7 @@ class Checkers:
     def check_if_end_of_turn(self, moving_piece, starting_square, landing_square):
         """Checks if this is the mid-point in a multi-jump move. If it is a mid-point, return False."""
         if moving_piece.get_color() == 'Black':
-            if landing_square[0] - starting_square[0] > 0:  # Moving down
+            if landing_square[0] - starting_square[0] > 0 or moving_piece.get_type() != 'normal':  # Moving down
                 potential_right_move = (landing_square[0] + 1, landing_square[1] + 1)
                 potential_left_move = (landing_square[0] + 1, landing_square[1] - 1)
                 for piece in self._pieces:
@@ -308,7 +308,7 @@ class Checkers:
                                     (potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
                                 return False
 
-            if landing_square[0] - starting_square[0] < 0:  # Moving up
+            if landing_square[0] - starting_square[0] < 0 or moving_piece.get_type() != 'normal':  # Moving up
                 potential_right_move = (landing_square[0] - 1, landing_square[1] + 1)
                 potential_left_move = (landing_square[0] - 1, landing_square[1] - 1)
                 for piece in self._pieces:
@@ -324,7 +324,7 @@ class Checkers:
                                 return False
 
         elif moving_piece.get_color() == 'White':
-            if landing_square[0] - starting_square[0] > 0:  # Moving down
+            if landing_square[0] - starting_square[0] > 0 or moving_piece.get_type() != 'normal':  # Moving down
                 potential_right_move = (landing_square[0] + 1, landing_square[1] + 1)
                 potential_left_move = (landing_square[0] + 1, landing_square[1] - 1)
                 for piece in self._pieces:
@@ -339,7 +339,7 @@ class Checkers:
                                     (potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
                                 return False
 
-            if landing_square[0] - starting_square[0] < 0:  # Moving up
+            if landing_square[0] - starting_square[0] < 0 or moving_piece.get_type() != 'normal':  # Moving up
                 potential_right_move = (landing_square[0] - 1, landing_square[1] + 1)
                 potential_left_move = (landing_square[0] - 1, landing_square[1] - 1)
                 for piece in self._pieces:
@@ -437,11 +437,7 @@ class Checkers:
             return player_2.get_name()
         elif len(player_2.get_total_pieces()) == 0:
             return player_1.get_name()
-
-        # TODO: Need to add check for stale-mate for all types of pieces.
-
-    def check_potential_moves(self, player):
-        """Checks if any of the player's remaining pieces has a potential move. Returns False if they don't."""
+        return 'Game has not ended'
 
 
 if __name__ == '__main__':
@@ -463,4 +459,17 @@ if __name__ == '__main__':
     game.play_game('Maggie', (5, 2), (7, 0))
     game.play_game('Eric', (6, 3), (5, 2))
     game.play_game('Maggie', (7, 0), (3, 4))
+    game.play_game('Eric', (5, 0), (4, 1))
+    game.play_game('Maggie', (0, 1), (1, 0))
+    game.play_game('Eric', (4, 1), (3, 2))
+    game.play_game('Maggie', (3, 4), (2, 3))
+    game.play_game('Eric', (7, 2), (6, 1))
+    game.play_game('Maggie', (2, 3), (5, 0))
+    game.play_game('Eric', (7, 4), (6, 3))
+    game.play_game('Maggie', (5, 0), (7, 2))
+    game.play_game('Eric', (6, 7), (5, 6))
+    game.play_game('Maggie', (7, 2), (3, 6))
+    game.play_game('Eric', (7, 6), (6, 7))
+    game.play_game('Maggie', (3, 6), (5, 4))
+    game.play_game('Eric', (4,7), (3, 6))
     game.print_board()
