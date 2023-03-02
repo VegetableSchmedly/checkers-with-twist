@@ -19,10 +19,6 @@ class TestGamePiece(unittest.TestCase):
         self.assertEqual(piece_1.get_type(), 'triple_king')
 
 
-
-
-
-
 class TestPlayer(unittest.TestCase):
     """Contains tests for the Player class."""
 
