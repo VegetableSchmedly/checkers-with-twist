@@ -23,12 +23,14 @@ class GamePiece:
     """Represents a game piece"""
 
     def __init__(self, row, column, color, piece_type='normal'):
+        """Initalizies the GamePiece data members."""
         self._row = row
         self._column = column
         self._color = color
         self._piece_type = piece_type  # Can be 'normal', 'king', or 'triple_king'
 
     def promote_piece(self):
+        """Promotes a piece from normal to king to triple_king."""
         if self._piece_type == 'normal':
             self._piece_type = 'king'
         elif self._piece_type == 'king':
@@ -420,12 +422,7 @@ class Checkers:
         for row in range(0, 8):
             row_list = []
             for column in range(0, 8):
-                for piece in self._pieces:
-                    if piece.get_location() == (row, column):
-                        row_list.append(self.get_checker_details((row, column)))
-                        break
-                else:
-                    row_list.append(None)
+                row_list.append(self.get_checker_details((row, column)))
             print(row_list)
         print('\n')
 
