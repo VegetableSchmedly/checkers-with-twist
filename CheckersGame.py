@@ -114,6 +114,10 @@ class Player:
         """Adds a captured piece to the list."""
         self._captured_pieces.append(piece)
 
+    def remove_piece(self, piece):
+        """Removes the piece from the player's list."""
+        self._pieces.remove(piece)
+
     def get_total_pieces(self):
         """Returns a list of all GamePiece objects associated with player."""
         return self._pieces
@@ -186,7 +190,7 @@ class Checkers:
         move_column = destination[1]
         moving_piece.set_row(move_row)
         moving_piece.set_column(move_column)
-        if abs(move_row - current_row) > 1:  # If 2 row move, a jump was executed.
+        if abs(move_row - current_row) == 2:  # If 2 row move, a jump was executed.
             if move_column > current_column:
                 jump_column = current_column + 1
             else:
@@ -219,6 +223,7 @@ class Checkers:
         squares_crossed = []
         moving_piece.set_row(move_row)
         moving_piece.set_column(move_column)
+        end_of_turn_flag = True
         if move_row - current_row > 1:  # If a 2 row move, a jump was executed DOWN the board
             if move_column - current_column > 1:  # Moving DOWN to RIGHT
                 crossed_row = current_row + 1
@@ -254,14 +259,11 @@ class Checkers:
                 if piece.get_location() == square and piece.get_color() != moving_piece.get_color():
                     self.capture_piece(player, piece)
                     capture_count += 1
-                    if rows_moved == 2:  # Check to see if it was a normal jump, therefore able to be a multi-jump
-                        if self.check_if_end_of_turn(moving_piece, start,
-                                                     destination) is True:  # Called since we made a jump.
-                            self.promotion_check(moving_piece)
-                            self._turn += 1
-        else:
-            self.promotion_check(moving_piece)
-            self._turn += 1
+        if rows_moved == 2 and capture_count > 0:  # Check to see if it was a normal jump, therefore able to be a multi-jump
+            if not self.check_if_end_of_turn(moving_piece, start, destination):  # Called since we made a jump.:
+                return capture_count
+        self.promotion_check(moving_piece)
+        self._turn += 1
         return capture_count
 
     def make_triple_king_move(self, player, moving_piece, start, destination):  # TODO: Add TK constraints
@@ -275,6 +277,7 @@ class Checkers:
         squares_crossed = []
         moving_piece.set_row(move_row)
         moving_piece.set_column(move_column)
+        end_of_turn_flag = True
         if move_row - current_row > 1:  # If a 2 row move, a jump was executed DOWN the board
             if move_column - current_column > 1:  # Moving DOWN to RIGHT
                 crossed_row = current_row + 1
@@ -310,14 +313,11 @@ class Checkers:
                 if piece.get_location() == square and piece.get_color() != moving_piece.get_color():
                     self.capture_piece(player, piece)
                     capture_count += 1
-                    if rows_moved == 2:  # Check to see if it was a normal jump, therefore able to be a multi-jump
-                        if self.check_if_end_of_turn(moving_piece, start,
-                                                     destination) is True:  # Called since we made a jump.
-                            self.promotion_check(moving_piece)
-                            self._turn += 1
-        else:
-            self.promotion_check(moving_piece)
-            self._turn += 1
+        if rows_moved == 2 and capture_count > 0:  # Check to see if it was a normal jump, therefore able to be a multi-jump
+            if not self.check_if_end_of_turn(moving_piece, start, destination):  # Called since we made a jump.:
+                return capture_count
+        self.promotion_check(moving_piece)
+        self._turn += 1
         return capture_count
 
     def promotion_check(self, piece):
@@ -335,9 +335,13 @@ class Checkers:
                 piece.promote_piece()
 
     def capture_piece(self, player, piece):
-        """Removes the piece from the board and adds it to the player's captured list."""
+        """Removes the piece from the board and the opposing Player's list and adds it to the Player's captured list."""
         self._pieces.remove(piece)
         player.add_captured_piece(piece)
+        for opponent in self._players:
+            if piece.get_color() == opponent.get_color():
+                opponent.remove_piece(piece)
+
 
     def check_if_end_of_turn(self, moving_piece, starting_square, landing_square):
         """Checks if this is the mid-point in a multi-jump move. If it is a mid-point, return False."""
@@ -395,12 +399,12 @@ class Checkers:
                     if piece.get_location() == potential_left_move and piece.get_color() == 'Black':
                         if potential_left_move[0] > 0 and potential_left_move[1] > 0:
                             if self.get_checker_details(
-                                    (potential_left_move[0] + 1, potential_left_move[1] - 1)) is None:
+                                    (potential_left_move[0] - 1, potential_left_move[1] - 1)) is None:
                                 return False
                     if piece.get_location() == potential_right_move and piece.get_color() == 'Black':
                         if potential_right_move[0] > 0 and potential_right_move[1] < 7:
                             if self.get_checker_details(
-                                    (potential_right_move[0] + 1, potential_right_move[1] + 1)) is None:
+                                    (potential_right_move[0] - 1, potential_right_move[1] + 1)) is None:
                                 return False
         return True
 
