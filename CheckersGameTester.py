@@ -2,7 +2,7 @@
 # GitHub username: VegetableSchmedly
 # Date:2/24/2023
 # Description:
-
+import CheckersGame
 import CheckersGame as check
 import unittest
 
@@ -22,44 +22,111 @@ class TestGamePiece(unittest.TestCase):
 class TestPlayer(unittest.TestCase):
     """Contains tests for the Player class."""
 
+    def setUp(self):
+        """Sets up the board for all of the tests."""
+        self.game = check.Checkers()
+        self.game.create_player('Eric', 'Black')
+        self.game.create_player('Maggie', 'White')
+        self.game.play_game('Eric', (5, 0), (4, 1))
+        self.game.play_game('Maggie', (2, 1), (3, 2))
+        self.game.play_game('Eric', (5, 2), (4, 3))
+        self.game.play_game('Maggie', (2, 3), (3, 4))
+        self.game.play_game('Eric', (4, 1), (2, 3))
+        self.game.play_game('Maggie', (3, 4), (4, 5))
+        self.game.play_game('Eric', (5, 6), (4, 7))
+        self.game.play_game('Maggie', (1, 2), (3, 4))
+        self.game.play_game('Maggie', (3, 4), (5, 2))
+        self.game.play_game('Eric', (6, 1), (5, 0))
+        self.game.play_game('Maggie', (1, 0), (2, 1))
+        self.game.play_game('Eric', (7, 0), (6, 1))
+        self.game.play_game('Maggie', (5, 2), (7, 0))
+        self.game.play_game('Eric', (6, 3), (5, 2))
+        self.game.play_game('Maggie', (7, 0), (3, 4))
+
     def test_1_Player(self):
         """Tests get methods for king, triple_king, and captured pieces counts."""
-        game = check.Checkers()
-        game.create_player('Eric', 'Black')
-        game.create_player('Maggie', 'White')
-        game.play_game('Eric', (5, 0), (4, 1))
-        game.play_game('Maggie', (2, 1), (3, 2))
-        game.play_game('Eric', (5, 2), (4, 3))
-        game.play_game('Maggie', (2, 3), (3, 4))
-        game.play_game('Eric', (4, 1), (2, 3))
-        game.play_game('Maggie', (3, 4), (4, 5))
-        game.play_game('Eric', (5, 6), (4, 7))
-        game.play_game('Maggie', (1, 2), (3, 4))
-        game.play_game('Maggie', (3, 4), (5, 2))
-        game.play_game('Eric', (6, 1), (5, 0))
-        game.play_game('Maggie', (1, 0), (2, 1))
-        game.play_game('Eric', (7, 0), (6, 1))
-        game.play_game('Maggie', (5, 2), (7, 0))
-        game.play_game('Eric', (6, 3), (5, 2))
-        game.play_game('Maggie', (7, 0), (3, 4))
-        game.print_board()
+        player_1 = self.game._players[0]
+        player_2 = self.game._players[1]
+        self.assertEqual(1, player_2.get_king_count())
+        self.assertEqual(0, player_1.get_king_count())
+        self.game.play_game('Eric', (4, 7), (3, 6))
+        self.game.play_game('Maggie', (3, 4), (4, 3))
+        self.game.play_game('Eric', (7, 2), (6, 1))
+        self.assertEqual(4, player_2.get_captured_pieces_count())
+        self.game.play_game('Maggie', (4, 3), (7, 0))
+        self.assertEqual(5, player_2.get_captured_pieces_count())
+        self.game.play_game('Eric', (5,0), (4,1))
+        self.game.play_game('Maggie', (1, 4), (2, 3))
+        self.assertEqual(1, player_1.get_captured_pieces_count())
+        self.game.play_game('Eric', (3,6), (1,4))
+        self.assertEqual(2, player_1.get_captured_pieces_count())
+        self.game.play_game('Maggie', (0, 3), (1, 2))
+        self.game.play_game('Eric', (1,4), (0,3))
+        self.assertEqual(1, player_1.get_king_count())
+        self.game.play_game('Maggie', (1, 6), (2, 5))
+        self.game.play_game('Eric', (4,1), (3,2))
+        self.game.play_game('Maggie', (0, 7), (1, 6))
+        self.game.play_game('Eric', (3,2), (1,0))
+        self.game.play_game('Maggie', (7, 0), (6, 1))
+        self.game.play_game('Eric', (5,4), (4,3))
+        self.assertEqual(0, player_2.get_triple_king_count())
+        self.game.play_game('Maggie', (6, 1), (0, 7))
+        self.assertEqual(1, player_2.get_triple_king_count())
+
+        self.game.print_square_board()
+
 
 
 
 class TestCheckers(unittest.TestCase):
     """Contains tests for the Checkers class."""
 
-    def test_0_Checkers(self):
-        """Tests all mandatory Exceptions"""
+    def setUp(self):
+        """Sets up the board for all of the tests."""
+        self.game = check.Checkers()
+        self.game.create_player('Eric', 'Black')
+        self.game.create_player('Maggie', 'White')
+        self.game.play_game('Eric', (5, 0), (4, 1))
+        self.game.play_game('Maggie', (2, 1), (3, 2))
+        self.game.play_game('Eric', (5, 2), (4, 3))
+        self.game.play_game('Maggie', (2, 3), (3, 4))
+        self.game.play_game('Eric', (4, 1), (2, 3))
+        self.game.play_game('Maggie', (3, 4), (4, 5))
+        self.game.play_game('Eric', (5, 6), (4, 7))
+        self.game.play_game('Maggie', (1, 2), (3, 4))
+        self.game.play_game('Maggie', (3, 4), (5, 2))
+        self.game.play_game('Eric', (6, 1), (5, 0))
+        self.game.play_game('Maggie', (1, 0), (2, 1))
+        self.game.play_game('Eric', (7, 0), (6, 1))
+        self.game.play_game('Maggie', (5, 2), (7, 0))
+        self.game.play_game('Eric', (6, 3), (5, 2))
+        self.game.play_game('Maggie', (7, 0), (3, 4))
+
 
     def test_1_Checkers(self):
-        """Test fill board and get checker details at creation of game."""
+        """Tests all mandatory Exceptions"""
+        with self.assertRaises(CheckersGame.InvalidPlayer):
+             self.game.play_game('Schmed', (4,7), (3,6))
+
+        with self.assertRaises(CheckersGame.InvalidSquare):     # Test using wrong color piece
+            self.game.play_game('Eric', (3,4), (2,3))
+
+        with self.assertRaises(CheckersGame.InvalidSquare):     # Tests moving off board into negative
+            self.game.play_game('Eric', (5,0), (4,-1))
+
+        with self.assertRaises(CheckersGame.InvalidSquare):     # Tests moving off board to 8
+            self.game.play_game('Eric', (6,7), (7,8))
+
+        with self.assertRaises(CheckersGame.OutofTurn):
+            self.game.play_game('Maggie', (3,4), (4,3))
 
     def test_2_Checkers(self):
         """Tests create player"""
+        player_1 = self.game.create_player('Schmed', 'White')
+        self.assertIn(player_1, self.game._players)
 
     def test_3_Checkers(self):
-        """Tests play game and normal moves, including a single, double, and triple jump for each color"""
+        """Tests play game and normal moves, including a single and double jump for each color"""
 
     def test_4_Checkers(self):
         """Tests promotion check for the ending of a jump, and a regular move. For each color.

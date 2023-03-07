@@ -174,7 +174,7 @@ class Checkers:
             return self.make_king_move(current_player, current_piece, starting_square_location,
                                        destination_square_location)
         elif current_piece.get_type() == 'triple_king':
-            return self.make_king_move(current_player, current_piece, starting_square_location,
+            return self.make_triple_king_move(current_player, current_piece, starting_square_location,
                                               destination_square_location)
 
     def make_normal_move(self, player, moving_piece, start, destination):
@@ -208,7 +208,7 @@ class Checkers:
             self._turn += 1
         return capture_count
 
-    def make_king_move(self, player, moving_piece, start, destination):
+    def make_king_move(self, player, moving_piece, start, destination):     # TODO: Add king constraints
         """Makes a directed move with the rules of a king."""
         capture_count = 0
         current_row = start[0]
@@ -264,14 +264,61 @@ class Checkers:
             self._turn += 1
         return capture_count
 
-    def make_triple_king_move(self, player, piece, start, destination):
+    def make_triple_king_move(self, player, moving_piece, start, destination):  # TODO: Add TK constraints
         """Makes a directed move with the rules of a triple king."""
+        capture_count = 0
         current_row = start[0]
         current_column = start[1]
         move_row = destination[0]
         move_column = destination[1]
-        #TODO: else:
-        #     self._turn += 1
+        rows_moved = abs(current_row - move_row)
+        squares_crossed = []
+        moving_piece.set_row(move_row)
+        moving_piece.set_column(move_column)
+        if move_row - current_row > 1:  # If a 2 row move, a jump was executed DOWN the board
+            if move_column - current_column > 1:  # Moving DOWN to RIGHT
+                crossed_row = current_row + 1
+                crossed_column = current_column + 1
+                for square in range(current_row + 1, move_row):
+                    squares_crossed.append((crossed_row, crossed_column))
+                    crossed_row += 1
+                    crossed_column += 1
+            else:  # Moving DOWN to LEFT
+                crossed_row = current_row + 1
+                crossed_column = current_column - 1
+                for square in range(current_row + 1, move_row):
+                    squares_crossed.append((crossed_row, crossed_column))
+                    crossed_row += 1
+                    crossed_column -= 1
+        elif current_row - move_row > 1:  # If a 2 row move, a jump was executed UP the board
+            if move_column - current_column > 1:  # Moving UP to RIGHT
+                crossed_row = current_row - 1
+                crossed_column = current_column + 1
+                for square in range(current_row - 1, move_row, -1):
+                    squares_crossed.append((crossed_row, crossed_column))
+                    crossed_row -= 1
+                    crossed_column += 1
+            else:  # Moving UP to LEFT
+                crossed_row = current_row - 1
+                crossed_column = current_column - 1
+                for square in range(current_row - 1, move_row, -1):
+                    squares_crossed.append((crossed_row, crossed_column))
+                    crossed_row -= 1
+                    crossed_column -= 1
+        for square in squares_crossed:
+            for piece in self._pieces:
+                if piece.get_location() == square and piece.get_color() != moving_piece.get_color():
+                    self.capture_piece(player, piece)
+                    capture_count += 1
+                    if rows_moved == 2:  # Check to see if it was a normal jump, therefore able to be a multi-jump
+                        if self.check_if_end_of_turn(moving_piece, start,
+                                                     destination) is True:  # Called since we made a jump.
+                            self.promotion_check(moving_piece)
+                            self._turn += 1
+        else:
+            self.promotion_check(moving_piece)
+            self._turn += 1
+        return capture_count
 
     def promotion_check(self, piece):
         """Check if piece is to be promoted, and promote if applicable."""
@@ -418,7 +465,17 @@ class Checkers:
             return None
 
     def print_board(self):
-        """Prints the gameboard in a readable array, row by row."""
+        """Prints the gameboard in an array, row by row."""
+        game_list = []
+        for row in range(0, 8):
+            row_list = []
+            for column in range(0, 8):
+                row_list.append(self.get_checker_details((row, column)))
+            game_list.append(row_list)
+        print(game_list)
+
+    def print_square_board(self):
+        """Prints the gameboard in a readable format."""
         for row in range(0, 8):
             row_list = []
             for column in range(0, 8):
@@ -469,4 +526,4 @@ if __name__ == '__main__':
     game.play_game('Eric', (7, 6), (6, 7))
     game.play_game('Maggie', (3, 6), (5, 4))
     game.play_game('Eric', (4,7), (3, 6))
-    game.print_board()
+    game.print_square_board()
