@@ -284,18 +284,7 @@ class TestCheckers(unittest.TestCase):
         self.game.play_game('Eric', (2,3), (3,2))
         self.assertEqual('Game has not ended', self.game.game_winner())
         self.game.play_game('Maggie', (4, 3), (2, 1))
-        self.assertEqual('Maggie', self.game.game_winner())             #TODO FIX
-
-
-
-
-
-
-
-
-
-
-
+        self.assertEqual('Maggie', self.game.game_winner())
 
 
 if __name__ == '__main__':
