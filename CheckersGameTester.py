@@ -1,7 +1,8 @@
 # Author: Eric Daly
 # GitHub username: VegetableSchmedly
-# Date:2/24/2023
-# Description:
+# Date:3/18/2023
+# Description: Unit tests for all classes/methods in CheckersGame.py
+
 import CheckersGame
 import CheckersGame as check
 import unittest

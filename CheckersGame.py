@@ -1,7 +1,9 @@
 # Author: Eric Daly
 # GitHub username: VegetableSchmedly
-# Date: 3/1/2023
-# Description:
+# Date:3/18/2023
+# Description: A chess game between two player objects. There are different rules depending on the type of piece being
+#   moved. There are multiple exception to catch a player making an invalid move. The only way to win is to capture all
+#   opposing pieces.
 
 
 class OutofTurn(Exception):
@@ -498,4 +500,18 @@ class Checkers:
         return 'Game has not ended'
 
 
+if __name__ == '__main__':
+    game = Checkers()
+    Player1 = game.create_player("Adam", "White")
 
+    Player2 = game.create_player("Lucy", "Black")
+
+    game.play_game("Lucy", (5, 6), (4, 7))
+
+    game.play_game("Adam", (2, 1), (3, 0))
+
+    game.get_checker_details((3, 1))
+
+    Player1.get_captured_pieces_count()
+
+    game.print_square_board()
